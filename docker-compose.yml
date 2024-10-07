@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: timak_DB
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: onsemi
+    volumes:
+      - ./init-scripts/sql:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
