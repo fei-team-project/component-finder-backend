@@ -1,18 +1,22 @@
 package com.onsemi.gpt.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Configuration;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import org.springframework.context.annotation.Configuration;
+
+import io.github.cdimascio.dotenv.Dotenv;
+import lombok.extern.slf4j.Slf4j;
+
 @Configuration
 @Slf4j
 public class ChatGPTAPI {
-    private static final String OPENAI_API_KEY = ""; // gpt-4-1106-preview Onsemi personalis
+
+    private static final Dotenv dotenv = Dotenv.load();
+    private static final String OPENAI_API_KEY = dotenv.get("OPENAI_API_KEY");
     private static final String GPT_ENDPOINT = "https://api.openai.com/v1/chat/completions";
     private static final String MODEL_NAME = "gpt-4-1106-preview";
 
