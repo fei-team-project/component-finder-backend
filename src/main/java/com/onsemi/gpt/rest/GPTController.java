@@ -28,7 +28,7 @@ public class GPTController {
     }
 
     @PostMapping("/request/category/new")
-    public GPTResponse getCategoryResponse(@RequestBody GPTFiltersRequest request){
-        return this.service.getFilters(request);
+    public GPTResponse getCategoryResponse(@RequestBody GPTRequest request){
+        return this.service.getCategories(request);
     }
 }

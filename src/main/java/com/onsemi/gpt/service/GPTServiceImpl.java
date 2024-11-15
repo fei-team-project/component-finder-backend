@@ -67,19 +67,15 @@ public class GPTServiceImpl implements GPTService {
         return response;
     }
 
-    public GPTResponse<?> getCategory(GPTFiltersRequest request){
+    @Override
+    public GPTResponse<?> getCategories(GPTRequest request){
         GPTResponse<?> response = new GPTResponse<>();
 
-        try{
-            ExtractResponse extractResponse = extractService.extractFromFilterRequest(request.getAttributes(), request.getComponent());
-            QueryResponse queryResponse = queryService.generateAndExecuteSQL(extractResponse.getAttributesJson(), extractResponse.getComponent());
-            String filterResponse = "I've updated the list of components in the table below based on the changes you made to the filters on the left side of our chat. " +
-                    "Take a look and let me know if everything looks good or if you need any further adjustments";
-            response = getGptResponse(response, extractResponse, queryResponse, filterResponse);
-        } catch (NotFoundException e) {
+        try {
+            int selectedCategory = GPTCategorySelector.determineCategory(request.getRequest());
+            response.setContent("We have selected the category " + selectedCategory);
+        } catch (Exception e) {
             response.setContent(e.getMessage());
-        } catch (Exception e){
-            response.setContent("An error occurred while generating the response on OpenAI ChatGPT API side");
         }
 
         return response;

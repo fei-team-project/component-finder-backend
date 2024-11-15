@@ -11,4 +11,6 @@ public interface GPTService {
     GPTResponse getResponse(GPTRequest request);
 
     GPTResponse getFilters(GPTFiltersRequest request);
+
+    GPTResponse getCategories(GPTRequest request);
 }
