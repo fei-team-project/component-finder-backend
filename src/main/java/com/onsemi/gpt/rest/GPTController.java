@@ -2,6 +2,7 @@ package com.onsemi.gpt.rest;
 
 import com.onsemi.gpt.models.GPTFiltersRequest;
 import com.onsemi.gpt.models.GPTResponse;
+import com.onsemi.gpt.service.EmbeddingsService;
 import com.onsemi.gpt.service.GPTService;
 import com.onsemi.gpt.service.ModelSelectorService;
 import com.onsemi.gpt.models.GPTRequest;
@@ -25,5 +26,13 @@ public class GPTController {
     @PostMapping("/request/update")
     public GPTResponse getFiltersResponse(@RequestBody GPTFiltersRequest request){
         return this.service.getFilters(request);
+    }
+
+    @GetMapping("/embeddings/test")
+    public String testEmbeddingsSuccessRate(){
+        double success = EmbeddingsService.testSuccess();
+        String res = "The success rate of Embeddings is: " + success + "%";
+        System.out.println(res);
+        return res;
     }
 }
