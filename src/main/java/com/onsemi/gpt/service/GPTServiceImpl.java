@@ -67,20 +67,6 @@ public class GPTServiceImpl implements GPTService {
         return response;
     }
 
-    @Override
-    public GPTResponse<?> getCategories(GPTRequest request){
-        GPTResponse<?> response = new GPTResponse<>();
-
-        try {
-            int selectedCategory = GPTCategorySelector.determineCategory(request.getRequest());
-            response.setContent("We have selected the category " + selectedCategory);
-        } catch (Exception e) {
-            response.setContent(e.getMessage());
-        }
-
-        return response;
-    }
-
     private GPTResponse<?> getGptResponse(GPTResponse<?> response, ExtractResponse extractResponse, QueryResponse queryResponse, String humanResponse){
         response.setContent(humanResponse);
         response.setAttributes(queryResponse.getAttributes());
