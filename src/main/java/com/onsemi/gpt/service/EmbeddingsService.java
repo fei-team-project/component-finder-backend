@@ -8,9 +8,6 @@ import java.security.MessageDigest;
 import java.util.*;
 import io.github.cdimascio.dotenv.Dotenv;
 
-//import com.onsemi.gpt.models.GPTFiltersRequest;
-//import com.onsemi.gpt.models.GPTRequest;
-//import com.onsemi.gpt.models.GPTResponse;
 import org.json.*;
 
 public class EmbeddingsService {
@@ -18,10 +15,12 @@ public class EmbeddingsService {
     private static final String OPENAI_API_KEY = dotenv.get("OPENAI_API_KEY");
 
     public static class Category {
+        int id;
         String title;
         List<String> examples;
 
-        public Category(String title, List<String> examples) {
+        public Category(String title, List<String> examples, int id) {
+            this.id = id;
             this.title = title;
             this.examples = examples;
         }
@@ -99,7 +98,21 @@ public class EmbeddingsService {
                 }
                 embeddings.add(embedding);
             }
-            categoryEmbeddings.put(category.title, embeddings);
+//            categoryEmbeddings.put(category.title, embeddings);
+
+            // 2. pristup
+            // kazda kategoria bude 1 vector cize budeme mat 5 vektorov
+
+            double[] averagedEmbedding = new double[embeddings.get(0).length];
+            for (double[] embedding : embeddings) {
+                for (int i = 0; i < embedding.length; i++) {
+                    averagedEmbedding[i] += embedding[i];
+                }
+            }
+            for (int i = 0; i < averagedEmbedding.length; i++) {
+                averagedEmbedding[i] /= embeddings.size();
+            }
+            categoryEmbeddings.put(category.title, Collections.singletonList(averagedEmbedding));
         }
 
         JSONObject saveData = new JSONObject();
@@ -170,68 +183,123 @@ public class EmbeddingsService {
     static Map<String, List<double[]>> categoryEmbeddings;
     static {
 
+        // -------------
+        // TRAINING DATA
+        // -------------
+
         categories.add(new Category(
-                "Find Documentation on Part",
+//                "Search for a Part by Parameters",
+                "1",
                 Arrays.asList(
-                        "Please provide documentation for N channel SiC MOSFETs in a D2PAK7 package, with a breakdown voltage above 650 V and a drain current capacity of at least 60 A",
-                        "Could you share documentation for SiC transistors that can withstand 100A and have a breakdown voltage exceeding 1200 V, ideally with packages that include separate pins for gate driver and power bus source?",
-                        "Please provide datasheets or technical documentation for N channel MOSFETs in the mid breakdown voltage range of 50-100 V, particularly dual n-type packaged products supporting drain currents between 10-40 A.",
-                        "I need documentation on dual n-type MOSFETs with a common drain, focusing on parts with Vbr around 20-40 V and a drain current of at least 8 A.",
-                        "Could you provide documentation for p channel MOSFET transistors with automotive qualification, especially those optimized for the best RdsON x Qg parameters?",
-                        "Please send the technical documentation for N channel MOSFETs with the best figure of merit in the breakdown voltage range of 100-150 V.",
-                        "Can you provide documentation for an IGBT suitable for automotive applications, with breakdown voltage between 600-800 V and saturation voltage below 2 V?",
-                        "Please provide datasheets or technical documentation for 3.3V automotive-rated diodes capable of at least 1W power dissipation."
-                )
-        ));
-        categories.add(new Category(
-                "Suggest Complementary Parts",
-                Arrays.asList(
-                        "Can you suggest complementary components for an N channel SiC MOSFET in D2PAK7 package, with a breakdown voltage above 650 V and drain current of at least 60 A?",
-                        "Could you recommend suitable gate driver circuits or power management components for SiC transistors that can withstand 100A and over 1200 breakdown voltage, ideally with separate pins for gate driver and power bus source?",
-                        "Please suggest complementary parts for mid breakdown voltage range 50-100 V N channel MOSFETs, preferably dual n-type packaged products supporting drain currents between 10-40 A.",
-                        "I’m searching for complementary components for dual n-type MOSFETs with common drain. Please focus on parts that support Vbr around 20-40 V and drain current of at least 8 A.",
-                        "Could you recommend complementary parts for p channel MOSFET transistors with automotive qualification, optimized for RdsON x Qg performance?",
-                        "What complementary components would pair well with N channel MOSFETs with the best figure of merit for breakdown voltage in the 100-150 V range?",
-                        "Please suggest complementary components to go with an IGBT for automotive applications, with breakdown voltage between 600-800 V and a saturation voltage below 2 V.",
-                        "Could you recommend complementary parts for 3.3V automotive-rated diodes that can handle at least 1W power dissipation?"
-                )
-        ));
-        categories.add(new Category(
-                "Search for a Part by Parameters",
-                Arrays.asList(
-                        "Please give me N channel SiC MOSFETs in D2PAK7 package with breakdown voltage above 650 V and capable of delivering drain current at least 60 A.",
-                        "Do you have any SiC transistors available that could withstand 100A and survive more than 1200 breakdown voltage? I am interested in packages that provide separate pins for gate driver and power bus source.",
-                        "Try to state all mid breakdown voltage range 50 -100 V N channel MOSFETs. Give me only dual n-type packaged products if possible for drain currents between 10 - 40 A.",
-                        "Searching dual n type MOSFETs with common drain. Please look only for Vbr around 20 – 40 V and drain current at least 8 A.",
-                        "I am looking for p channel MOSFET transistors with automotive qualification, with best RdsON x Qg parameters.",
-                        "Give me N MOSFETs with best figure of merit from range of breakdown voltage between 100 – 150V.",
-                        "What IGBT would you propose for automotive application with breakdown voltage from 600-800 V and saturation voltage below 2 V?",
-                        "Please advise 3.3V diodes automotive capable with at least 1W power dissipation."
-                )
+                        "Find a MOSFET with a voltage rating of 600V, a current capacity of 30A, and Rds(on) less than 50mohm.",
+                        "Search for a low-dropout regulator with a maximum output voltage of 5V, input voltage up to 12V, and a minimum efficiency of 85%.",
+                        "Do you have a rectifier diode that supports 1000V, 10A, and a reverse recovery time under 35ns?",
+                        "Show me operational amplifiers with a gain bandwidth product over 10 MHz, input bias current below 10nA, and rail-to-rail output.",
+                        "What switching regulators can output 3.3V, handle 2A, and operate at a frequency of at least 1 MHz?",
+                        "Find a comparator with a response time faster than 100 ns, a supply voltage of 5V, and a push-pull output stage.",
+                        "Do you have IGBTs with a voltage rating of 1200V, current capacity of 50A, and a switching frequency above 20 kHz?",
+                        "Find a Schottky diode with a forward voltage drop under 0.4V, a reverse voltage of 40V, and a current capacity of 5A.",
+                        "Search for a DC-DC converter with an input range of 9V to 36V, an output of 12V, and efficiency greater than 90%.",
+                        "Find a thermistor with a resistance of 10kohm at 25C, a beta coefficient of 3950K, and a tolerance of 1%.",
+                        "What RF amplifiers offer a gain of at least 20 dB at 2.4 GHz, with a noise figure under 1.5 dB?",
+                        "Search for a temperature sensor with IC communication, an operating range of -40C to 125C, and a resolution of 0.1C.",
+                        "Find a triac that operates at 800V and handles 40A.",
+                        "Show me sensors compatible with a 3.3V supply.",
+                        "What Zener diodes offer a breakdown voltage of exactly 3.3V?"
+                ),
+                1
         ));
 
         categories.add(new Category(
-                "find similar parts",
+//                "Suggest Complementary Parts",
+                "2",
                 Arrays.asList(
-                        "Can you find an N channel MOSFET similar to those in the 200-300 V range, optimized for high-speed switching and low RdsON?",
-                        "Are there alternative SiC MOSFETs with a package comparable to TO-247, featuring a breakdown voltage of 1200 V and a drain current of 50 A?",
-                        "Could you recommend MOSFETs similar to those in a dual package with common source configuration, capable of handling 30 A and 60 V?",
-                        "I'm looking for alternatives to IGBTs in the 650 V range with a saturation voltage of less than 1.8 V and high switching efficiency.",
-                        "Can you find p channel MOSFETs comparable to those qualified for automotive use, focusing on 40 V breakdown voltage and low gate charge?",
-                        "Are there SiC transistors with specs similar to those rated for 80 A, 1700 V, and high thermal performance in a TO-247-4L package?"
-                )
+                        "Find compatible components for part number NVTYS006N06CL.",
+                        "What parts work well with NVMFS003P03P8Z?",
+                        "Suggest matching parts for NVMFS6H836NL.",
+                        "Identify complementary components for the part NVMFS5C673NL.",
+                        "Can you find suitable counterparts for NSV60200DMTWTBG?",
+                        "Look up supplementary parts for NSVT45010MW6T1G.",
+                        "What would pair well with SBC847BWT1G?",
+                        "Search for associated parts for SBC847BPDW1T1G.",
+                        "Find adjunct components to complement ARX383CSSM00SMD20.",
+                        "Propose compatible parts for NFVA22512NP2T.",
+                        "Can you recommend related parts for NFVA23512NP2T?",
+                        "Look for parts that match NFAM2512L7B.",
+                        "Suggest other parts that work with NFAM5065L4BT.",
+                        "Identify any compatible accessories for NFAM3065L4B.",
+                        "Can you locate synergistic parts for NB3N5573DTR2G?"
+                ),
+                2
         ));
 
         categories.add(new Category(
-                "find out the availability and price of the part",
+//                "Find Documentation on Part",
+                "3",
                 Arrays.asList(
-                        "Could you provide the availability and price for an N channel SiC MOSFET in a TO-220 package, rated for 650 V and 20 A?",
-                        "Are there SiC transistors available with a breakdown voltage of 1200 V and a drain current of 100 A? Please include pricing details.",
-                        "What is the cost and stock status of an automotive-qualified IGBT with a breakdown voltage of 600 V and a saturation voltage of 1.5 V?",
-                        "Can you provide pricing and availability for 3.3V automotive-rated diodes capable of handling 2 W of power dissipation?",
-                        "What are the current costs and stock levels for dual n-type MOSFETs with a common drain, rated for 40 V and 15 A?",
-                        "Are there N channel MOSFETs in stock with a breakdown voltage of 75 V, optimized for high current handling (30 A)? What is their price?"
-                )
+                        "Please provide documentation for this N channel SiC MOSFET  NVHL110N65S3HF",
+                        "Could you share documentation for NVHL120N12S3HF?",
+                        "Provide the datasheet for the MOSFET NVHL060N10S3F.",
+                        "I need documentation for the dual n-type MOSFET NVHL030N04S3F.",
+                        "Could you provide the technical specifications for PVHL050P65S3F?",
+                        "Please send the datasheet for NVHL100N15S3F.",
+                        "Can you provide documentation for IGHL080N08S3F?",
+                        "Retrieve the technical documentation for the diode ADHL03V33D1F.",
+                        "Where can I find the datasheet for NVHL110N65S3HF component?",
+                        "Locate the reference materials for the SiC transistor NVHL120N12S3HF.",
+                        "Search for the technical manual related to NVHL060N10S3F.",
+                        "Gather documentation on the dual n-type MOSFET NVHL030N04S3F.",
+                        "Access the datasheet for the P-channel MOSFET PVHL050P65S3F.",
+                        "Identify the specification sheet for NVHL100N15S3F",
+                        "Look up technical details for the IGBT IGHL080N08S3F."
+                ),
+                3
+        ));
+
+        categories.add(new Category(
+//                "find similar parts",
+                "4",
+                Arrays.asList(
+                        "Show me alternatives for NBA3N5573MNTXG",
+                        "I'm looking for components like NSVMUN2236T1G. Can you help?",
+                        "Are there any substitutes for NSVMUN5236T1G?",
+                        "Find me similar parts to NCV7518MWATXG.",
+                        "Can you suggest alternatives for NCP81080DR2G",
+                        "What are the comparable components to AFGB40T65RQDN?",
+                        "Please list similar components to FGHL50T65LQDT",
+                        "Can you help me find alternatives for AS0149ATSC00XUEA1-DPBR?",
+                        "Options like NCV333ASN2T1G",
+                        "Find similar to NCV20084DR2G.",
+                        "Alternatives for NVG800A75L4DSB2",
+                        "Similar to NXH600N65L4Q2F2PG",
+                        "Substitutes for NCV8711ASN330T1G",
+                        "Find similar to NCV8768CD33ABR2G.",
+                        "Alternatives for NIS6150MT1TXG"
+                ),
+                4
+        ));
+
+        categories.add(new Category(
+//                "find out the availability and price of the part",
+                "5",
+                Arrays.asList(
+                        "What is the price of AFGB30T65SQDN?",
+                        "Can you check if FCA20N60F is in stock?",
+                        "How much does the NXH450N65L4Q2cost?",
+                        "At what price can I buy FQP3P50?",
+                        "Is NXH600N105L7F5P2HG available?",
+                        "Could you confirm the availability of FQP3P50?",
+                        "What’s the current price of FCA20N60F?",
+                        "Is part FCH041N65EFL4currently available?",
+                        "What is the cost of the FQP3P50 component?",
+                        "Is FQP3P50 in stock, and how much is it?",
+                        "Could you tell me if the NXH450N65L4Q2is available?",
+                        "How much would it cost to get FQP3P50?",
+                        "Check availability and pricing for the part FQP3P50.",
+                        "Is FQP3P50 listed in the inventory?",
+                        "At what price can I purchase FQP3P50?"
+                ),
+                5
         ));
         try {
         categoryEmbeddings = loadOrGenerateEmbeddings(categories, "embeddings.json");
@@ -261,136 +329,90 @@ public class EmbeddingsService {
 
     public static double testSuccess(){
         try {
+
             List<TestEntry> testEntries = new ArrayList<>(Arrays.asList(
-                    new TestEntry("Can you suggest N channel MOSFETs similar to those in DPAK packaging but optimized for lower RdsON?", "find similar parts"),
-                    new TestEntry("Are there MOSFETs with characteristics close to 100 V breakdown and a 25 A drain current in a dual package?", "find similar parts"),
-                    new TestEntry("What is the availability and price for a 1.5 kV IGBT optimized for power switching in renewable energy systems?", "find out the availability and price of the part"),
-                    new TestEntry("Could you find alternatives to 60 V dual n-type MOSFETs with common source connections?", "find similar parts"),
-                    new TestEntry("What is the cost and availability of 20 V p channel MOSFETs with automotive qualification and low gate charge?", "find out the availability and price of the part"),
-                    new TestEntry("Are there similar transistors to SiC MOSFETs with a 650 V breakdown and high efficiency for use in motor control?", "find similar parts"),
-                    new TestEntry("Can you provide pricing details for TO-220 packaged SiC MOSFETs with a 30 A drain current and 900 V breakdown voltage?", "find out the availability and price of the part"),
-                    new TestEntry("Are there MOSFETs like those rated for 40 V and 10 A, but in a common drain configuration?", "find similar parts"),
-                    new TestEntry("What is the stock availability and price of 3.3 V Zener diodes capable of dissipating 1.5 W in automotive applications?", "find out the availability and price of the part"),
-                    new TestEntry("Can you suggest SiC MOSFETs with a higher current rating similar to the ones with 100 A and 1200 V breakdown?", "find similar parts"),
-                    new TestEntry("Could you provide the pricing and availability of high power IGBTs for industrial use with a 600 V breakdown voltage?", "find out the availability and price of the part"),
-                    new TestEntry("Are there alternatives to SiC MOSFETs rated for 650 V that offer higher efficiency for DC-DC converters?", "find similar parts"),
-                    new TestEntry("What is the availability and pricing for a 1200 V SiC MOSFET with a 60 A drain current capacity?", "find out the availability and price of the part"),
-                    new TestEntry("Can you find similar p-channel MOSFETs that support a breakdown voltage of 20-40 V with automotive qualification?", "find similar parts"),
-                    new TestEntry("What is the price and availability of N-channel MOSFETs with the best figure of merit in the 100-150V range?", "find out the availability and price of the part"),
-                    new TestEntry("Are there dual n-type MOSFETs with a common drain configuration supporting 30 V breakdown and 15 A drain current?", "find similar parts"),
-                    new TestEntry("What is the availability and cost for dual N-channel MOSFETs with a 40 V breakdown voltage and 8 A current in a D2PAK package?", "find out the availability and price of the part"),
-                    new TestEntry("Can you find high-performance transistors for automotive applications with breakdown voltages between 100 V and 150 V?", "find similar parts"),
-                    new TestEntry("Could you provide the availability and pricing for SiC MOSFETs rated for high current in a package with a gate driver pin?", "find out the availability and price of the part"),
-                    new TestEntry("Can you suggest alternative p-channel MOSFETs with optimized RdsON x Qg for automotive applications?", "find similar parts"),
-                    new TestEntry("Is the LM317 adjustable voltage regulator in stock?", "find out the availability and price of the part"),
-                    new TestEntry("What is the price of the ATmega328P microcontroller from Microchip?", "find out the availability and price of the part"),
-                    new TestEntry("What is the availability of a 100uF electrolytic capacitor with a 25V rating?", "find out the availability and price of the part"),
-                    new TestEntry("How much does a 1k ohm, 1/4 watt carbon film resistor cost?", "find out the availability and price of the part"),
-                    new TestEntry("Is the 555 timer IC available in DIP-8 package?", "find out the availability and price of the part"),
-                    new TestEntry("What is the cost of the Texas Instruments CD74HCT00N quad 2-input NAND gate IC?", "find out the availability and price of the part"),
-                    new TestEntry("How much does the Vishay 1N4148 signal diode cost?", "find out the availability and price of the part"),
-                    new TestEntry("Is the Bourns 3386P-1-103LF 10k ohm potentiometer available?", "find out the availability and price of the part"),
-                    new TestEntry("What is the price of the 74LS04 hex inverting logic gate IC?", "find out the availability and price of the part"),
-                    new TestEntry("What is the availability of the 100nF ceramic capacitor with a 50V rating?", "find out the availability and price of the part"),
-                    new TestEntry("What is the price of the Omron G5V-1-DC12 relay?", "find out the availability and price of the part"),
-                    new TestEntry("Is the Vishay SMD Zener diode, 5.1V, 1W in stock?", "find out the availability and price of the part"),
-                    new TestEntry("How much does the Panasonic ECJ-2FB1E104K 100nF ceramic capacitor cost?", "find out the availability and price of the part"),
-                    new TestEntry("Is the 74HC595 shift register in stock?", "find out the availability and price of the part"),
-                    new TestEntry("What is the cost of a 10A, 250V fast blow fuse?", "find out the availability and price of the part"),
-                    new TestEntry("Is the JST XH 2.54mm 4-pin connector available?", "find out the availability and price of the part"),
-                    new TestEntry("What is the price of the Vishay TL3 1W 5.1V Zener diode?", "find out the availability and price of the part"),
-                    new TestEntry("What is the availability of the Murata CSTCE16M0V53-R0 crystal oscillator?", "find out the availability and price of the part"),
-                    new TestEntry("What is the cost of a 10A automotive fuse for 12V systems?", "find out the availability and price of the part"),
-                    new TestEntry("Is the Cree XLamp XP-E2 LED in stock?", "find out the availability and price of the part"),
-                    new TestEntry("What is the price of the TE Connectivity 2-position female header connector?", "find out the availability and price of the part"),
-                    new TestEntry("What are some similar parts to the LM741 operational amplifier?", "find similar parts"),
-                    new TestEntry("Find me transistors similar to the 2N2222 NPN BJT.", "find similar parts"),
-                    new TestEntry("What are some alternatives to the LM7805 5V voltage regulator IC?", "find similar parts"),
-                    new TestEntry("I need MOSFETs similar to the IRF540 N-channel MOSFET.", "find similar parts"),
-                    new TestEntry("What are some alternatives to the Atmel ATmega328P microcontroller?", "find similar parts"),
-                    new TestEntry("Recommend me parts similar to the 1N4148 fast switching diode.", "find similar parts"),
-                    new TestEntry("Find me parts like the 10k ohm carbon film resistor.", "find similar parts"),
-                    new TestEntry("What are the alternatives to the Omron G5V-1-DC12 relay?", "find similar parts"),
-                    new TestEntry("Suggest a similar part to the ALPS EC11 rotary encoder.", "find similar parts"),
-                    new TestEntry("What are some alternatives to the MCP602 dual operational amplifier?", "find similar parts"),
-                    new TestEntry("Find capacitors like the Panasonic 10uF 50V ceramic capacitor.", "find similar parts"),
-                    new TestEntry("What are the alternatives to the 74LS00 quad 2-input NAND gate IC?", "find similar parts"),
-                    new TestEntry("I need transistors similar to the 2N3904 NPN transistor.", "find similar parts"),
-                    new TestEntry("What are some alternatives to the Panasonic ERJ-6ENF1002V 10k ohm resistor?", "find similar parts"),
-                    new TestEntry("Recommend me alternatives to the STMicroelectronics STM32F103C8T6 microcontroller.", "find similar parts"),
-                    new TestEntry("Find similar diodes to the 1N4007 general-purpose rectifier diode.", "find similar parts"),
-                    new TestEntry("What are the alternatives to the Vishay BC846B NPN transistor?", "find similar parts"),
-                    new TestEntry("Find me similar parts to the 10W 12V automotive fuse.", "find similar parts"),
-                    new TestEntry("What are some alternatives to the Texas Instruments TPS7A02 low-noise linear regulator?", "find similar parts"),
-                    new TestEntry("Recommend me similar parts to the Murata CSTCE16M0V53-R0 crystal oscillator.", "find similar parts"),
-                    new TestEntry("What are some similar switches to the Cherry MX mechanical switch?", "find similar parts"),
-                    new TestEntry("Where can I find the datasheet for the LM317 adjustable voltage regulator?", "Find Documentation on Part"),
-                    new TestEntry("Can you provide the pinout diagram for the 555 timer IC?", "Find Documentation on Part"),
-                    new TestEntry("Where can I find the programming guide for the ATmega328P microcontroller?", "Find Documentation on Part"),
-                    new TestEntry("What should I connect to PIN 1 of the ATmega328P microcontroller?", "Find Documentation on Part"),
-                    new TestEntry("What is the maximum voltage for the LM741 operational amplifier?", "Find Documentation on Part"),
-                    new TestEntry("Tell me more about the 2N2222 NPN BJT transistor.", "Find Documentation on Part"),
-                    new TestEntry("Where can I find the datasheet for the 1N4148 fast switching diode?", "Find Documentation on Part"),
-                    new TestEntry("Can you provide the user manual for the ESP32-WROOM-32 microcontroller?", "Find Documentation on Part"),
-                    new TestEntry("What is the application note for the LM7805 5V voltage regulator?", "Find Documentation on Part"),
-                    new TestEntry("Where can I find the reference design for the TL072 low-noise JFET op-amp?", "Find Documentation on Part"),
-                    new TestEntry("What is the schematic for a circuit using the BC547 NPN transistor?", "Find Documentation on Part"),
-                    new TestEntry("Can you provide the block diagram for the STM32F103C8T6 microcontroller?", "Find Documentation on Part"),
-                    new TestEntry("Where can I find the specification sheet for the 10k ohm carbon film resistor?", "Find Documentation on Part"),
-                    new TestEntry("Can you provide the technical document for the Panasonic 10uF 50V ceramic capacitor?", "Find Documentation on Part"),
-                    new TestEntry("Where can I find the installation guide for the Omron G5V-1-DC12 relay?", "Find Documentation on Part"),
-                    new TestEntry("What is the wiring diagram for the Cherry MX mechanical switch?", "Find Documentation on Part"),
-                    new TestEntry("Where can I find the test report for the 1N4007 general-purpose rectifier diode?", "Find Documentation on Part"),
-                    new TestEntry("Can you provide the evaluation board documentation for the STM32F103C8T6 microcontroller?", "Find Documentation on Part"),
-                    new TestEntry("Where can I find the design guide for the MeanWell HDR-15-12 power supply?", "Find Documentation on Part"),
-                    new TestEntry("Where can I find the datasheet for a 10k ohm resistor?", "Find Documentation on Part"),
-                    new TestEntry("Can you provide the user manual for the Texas Instruments TPL5010 low-power microcontroller?", "Find Documentation on Part"),
-                    new TestEntry("What resistor should I use with the IRF540N N-channel MOSFET?", "Suggest Complementary Parts"),
-                    new TestEntry("What capacitor is suitable for the LM7805 voltage regulator?", "Suggest Complementary Parts"),
-                    new TestEntry("Can you recommend a diode for the 555 timer IC circuit?", "Suggest Complementary Parts"),
-                    new TestEntry("I want to use an ATmega328P microcontroller with this, which one do you recommend?", "Suggest Complementary Parts"),
-                    new TestEntry("What is the best op-amp for the audio amplifier application using the NE5532?", "Suggest Complementary Parts"),
-                    new TestEntry("Which part do you recommend for the LM317 adjustable voltage regulator?", "Suggest Complementary Parts"),
-                    new TestEntry("What goes well with the 1N4148 fast switching diode?", "Suggest Complementary Parts"),
-                    new TestEntry("What should I use with the Arduino Uno microcontroller?", "Suggest Complementary Parts"),
-                    new TestEntry("What inductor should I use with the 10uF ceramic capacitor?", "Suggest Complementary Parts"),
-                    new TestEntry("What transistor should I use with the Omron G5V-1-DC12 relay?", "Suggest Complementary Parts"),
-                    new TestEntry("Can you recommend a zener diode for the LM7812 voltage regulator?", "Suggest Complementary Parts"),
-                    new TestEntry("What thermistor should I use with the ESP32-WROOM-32 microcontroller?", "Suggest Complementary Parts"),
-                    new TestEntry("What potentiometer should I use with the TL072 op-amp?", "Suggest Complementary Parts"),
-                    new TestEntry("What crystal oscillator should I use with the STM32F103C8T6 microcontroller?", "Suggest Complementary Parts"),
-                    new TestEntry("What fuse should I use with the MeanWell HDR-15-12 power supply?", "Suggest Complementary Parts"),
-                    new TestEntry("What switch should I use with the Omron G5V-1-DC12 relay?", "Suggest Complementary Parts"),
-                    new TestEntry("What connector should I use with the Raspberry Pi 4 Model B?", "Suggest Complementary Parts"),
-                    new TestEntry("What LED should I use with the 1k ohm resistor?", "Suggest Complementary Parts"),
-                    new TestEntry("What resistor should I use with the 5mm red LED?", "Suggest Complementary Parts"),
-                    new TestEntry("What capacitor should I use with the OP07 op-amp?", "Suggest Complementary Parts"),
-                    new TestEntry("Give me a MOSFET with a voltage rating of 100V, like the IRLZ44N", "Search for a Part by Parameters"),
-                    new TestEntry("Find a capacitor with capacitance of 100uF, such as the Panasonic EEU-FM1E101", "Search for a Part by Parameters"),
-                    new TestEntry("Search for a resistor with resistance of 1k ohm, like the Yageo CFR-25JB-1000K", "Search for a Part by Parameters"),
-                    new TestEntry("Find a microcontroller with 32KB of flash memory, such as the ATmega328P", "Search for a Part by Parameters"),
-                    new TestEntry("Search for a voltage regulator with 5V output, such as the LM7805", "Search for a Part by Parameters"),
-                    new TestEntry("Give me a part with a current rating of 1A, like the 1N5400 diode", "Search for a Part by Parameters"),
-                    new TestEntry("Give me all parts for a DC-DC converter", "Search for a Part by Parameters"),
-                    new TestEntry("Find a diode with a forward voltage of 0.7V, such as the 1N4148", "Search for a Part by Parameters"),
-                    new TestEntry("Search for an inductor with an inductance of 10mH, like the Murata LQG15HS10NJ02", "Search for a Part by Parameters"),
-                    new TestEntry("Give me a transistor with a gain of 100, such as the 2N2222", "Search for a Part by Parameters"),
-                    new TestEntry("Find a Zener diode with a breakdown voltage of 5.1V, such as the 1N4728A", "Search for a Part by Parameters"),
-                    new TestEntry("Search for a thermistor with a resistance of 10k ohm, like the NTC 10k thermistor from Honeywell", "Search for a Part by Parameters"),
-                    new TestEntry("Give me a relay with a coil voltage of 12V, such as the Omron G5V-1-DC12", "Search for a Part by Parameters"),
-                    new TestEntry("Find a potentiometer with a resistance of 10k ohm, like the Bourns 3296W-1-103LF", "Search for a Part by Parameters"),
-                    new TestEntry("Search for a crystal oscillator with a frequency of 16MHz, such as the ECS-160-20-5PXN", "Search for a Part by Parameters"),
-                    new TestEntry("Give me a fuse with a current rating of 2A, like the Littelfuse 212 2A", "Search for a Part by Parameters"),
-                    new TestEntry("Find a switch with a voltage rating of 250V, such as the TE Connectivity 1-1433701-2", "Search for a Part by Parameters"),
-                    new TestEntry("Search for a connector with 10 pins, like the Molex 10-02-7104", "Search for a Part by Parameters"),
-                    new TestEntry("Give me an LED with a forward current of 20mA, such as the Cree XP-E2", "Search for a Part by Parameters")
+                new TestEntry("Search for voltage supervisors with a threshold of 1.8V.", "1"),
+                new TestEntry("Do you have microcontrollers with at least 16 GPIO pins?", "1"),
+                new TestEntry("Find an LDO regulator with a dropout voltage under 200 mV.", "1"),
+                new TestEntry("What capacitive touch ICs support multi-touch functionality?", "1"),
+                new TestEntry("Search for current sense amplifiers with a gain of 50 V/V.", "1"),
+                new TestEntry("Find an optocoupler that supports a 5kV isolation voltage.", "1"),
+                new TestEntry("Show me analog switches with an on-resistance below 50mohm.", "1"),
+                new TestEntry("Search for a linear voltage regulator with an input voltage range of 2.5V to 12V.", "1"),
+                new TestEntry("What voltage references provide a 1.25V output?", "1"),
+                new TestEntry("Find a buck converter with an efficiency greater than 95% at 5V output.", "1"),
+                new TestEntry("What motor drivers support stepper motors with 24V input?", "1"),
+                new TestEntry("Do you have audio amplifiers with THD under 0.01%?", "1"),
+                new TestEntry("Find a power switch that can handle 10A at 5V.", "1"),
+                new TestEntry("Search for LED drivers compatible with RGB lighting applications.", "1"),
+                new TestEntry("What switching regulators can output 3.3V and handle 2A?", "1"),
+                new TestEntry("Can you suggest complementary electronic components that pair well with NB3N51044DTR2G?", "2"),
+                new TestEntry("I’m designing a circuit using NB3H5150. Could you recommend complementary parts, such as matching MOSFETs, drivers, or resistors?", "2"),
+                new TestEntry("I’m using an NB3H60113GH3MTR2G in a power switching application. What are some complementary parts or drivers that would work well in this setup?", "2"),
+                new TestEntry("Please list as many complementary parts as possible for the NB3H5150MNTXG, including suitable MOSFETs, gate drivers, resistors, and diodes for common configurations.", "2"),
+                new TestEntry("What parts would you recommend to complement the NCV2252SQ2T2G in a circuit?", "2"),
+                new TestEntry("I’m building an H-bridge circuit using NCV2393DR2G as the high-side switch. What complementary parts should I use for the low-side and gate drivers?", "2"),
+                new TestEntry("Could you recommend complementary MOSFETs and related circuitry for pairing with NCV2200SN1T1G in a half-bridge design?", "2"),
+                new TestEntry("Based on the NCV2200SN2T1G datasheet, what components (drivers, resistors, diodes) would pair well with it in terms of voltage, current, and switching speed?", "2"),
+                new TestEntry("I want to use the NSVMMUN2217LT1G for a power supply circuit. What complementary components would you suggest for effective operation?", "2"),
+                new TestEntry("I’m new to circuit design. Could you suggest some parts to use alongside NSVMMUN2231LT1G for a basic power circuit?", "2"),
+                new TestEntry("What are the typical complementary components for the NSVDTA123EM3T5G in a switching application?", "2"),
+                new TestEntry("What components would complement the NSVDTC123EM3T5G in a DC motor driver circuit?", "2"),
+                new TestEntry("Can you list complementary parts for NSVMUN5213DW1T3G in terms of gate drivers and protection components?", "2"),
+                new TestEntry("Suggest a suitable complementary MOSFET and related circuitry for use with NSVBC124XDXV6T1G in a push-pull converter.", "2"),
+                new TestEntry("I’m designing a solar charge controller and planning to use the SMUN5213DW1T1G. What complementary components, such as diodes and microcontrollers, would be suitable for this application?", "2"),
+                new TestEntry("Fetch the design documentation for ADHL03V33D1F", "3"),
+                new TestEntry("Could you share the technical datasheet for NVHL040N65S3F?", "3"),
+                new TestEntry("Provide information about the dual n-type MOSFET NVHL025N04S3F.", "3"),
+                new TestEntry("I need the documentation for SUPERFET III MOSFET NVHL095N65S3F.", "3"),
+                new TestEntry("Please locate the specifications for the P-channel MOSFET PVHL040P65S3F.", "3"),
+                new TestEntry("Can you fetch the datasheet for the automotive-rated IGBT IGHL060N08S3F?", "3"),
+                new TestEntry("Retrieve the technical manual for the 3.3V diode ADHL05V33D1F.", "3"),
+                new TestEntry("Provide the documentation for the N channel SiC MOSFET NVHL027N65S3F.", "3"),
+                new TestEntry("Access the reference sheet for the MOSFET NVHL080N12S3F.", "3"),
+                new TestEntry("Could you gather the design details for the dual n-type MOSFET NVHL018N04S3F?", "3"),
+                new TestEntry("Please send the datasheet for the P-channel transistor PVHL030P65S3F.", "3"),
+                new TestEntry("Could you provide the thermal characteristics for the MOSFET NVHL065N65S3F?", "3"),
+                new TestEntry("Retrieve the gate charge curve for the transistor NVHL040N10S3F", "3"),
+                new TestEntry("I need capacitance vs. reverse voltage graph for SiC diode FFSB0665A.", "3"),
+                new TestEntry("Locate the maximum ratings for the IGBT IGHL080N08S3F", "3"),
+                new TestEntry("Can you find the package dimensions for the diode FFSB0665A?", "3"),
+                new TestEntry("I'm searching for similar parts to AS0149ATSC00XUEA1-TRBR.", "4"),
+                new TestEntry("Show me options like FSB50825AB", "4"),
+                new TestEntry("Find components that are similar to FSB50550BS.", "4"),
+                new TestEntry("Can you provide alternatives for MMBF4391LT1G?", "4"),
+                new TestEntry("I'm looking for substitutes for NSVJ6904DSB6T1G", "4"),
+                new TestEntry("Are there any similar components to NVLJWD040N06CLTAG?", "4"),
+                new TestEntry("Similar to NVMJD015N06CLTWG.", "4"),
+                new TestEntry("Similar to FPF2496UCX.", "4"),
+                new TestEntry("Find substitutes for NCP302035MNTWG", "4"),
+                new TestEntry("Similar to NCP302040MNTWG.", "4"),
+                new TestEntry("Options like NCV8402AMNWT1G", "4"),
+                new TestEntry("Alternatives for NCV8405BDTRKG.", "4"),
+                new TestEntry("Find similar to AR0522SRSC09SURA0-DP", "4"),
+                new TestEntry("Substitutes for NOIP1SP0480A-STI1", "4"),
+                new TestEntry("Is component FCA20N60F in stock?", "5"),
+                new TestEntry("Could you confirm the stock status of AFGB30T65SQDN?", "5"),
+                new TestEntry("What is the unit price of FQP3P50?", "5"),
+                new TestEntry("Find out the availability FQP3P50 and its price.", "5"),
+                new TestEntry("Can you provide availability details for FQP3P50?", "5"),
+                new TestEntry("Is component AFGB30T65SQDN in stock? And for how much?", "5"),
+                new TestEntry("Look up the pricing for FCH041N65EFL4.", "5"),
+                new TestEntry("Could you find out the availability and provide a price for the FQP3P50 component?", "5"),
+                new TestEntry("Do you have component NXH450N65L4Q2 in stock, and what is its current cost?", "5"),
+                new TestEntry("Can you check if the FCA20N60F is in stock?", "5"),
+                new TestEntry("I need to confirm whether the FCH041N65EFL4 is available and at what price.", "5"),
+                new TestEntry("Is there a way to verify if AFGB30T65SQDN is in stock, along with its respective price?", "5"),
+                new TestEntry("Can you help me with providing pricing details for FQP3P50.", "5"),
+                new TestEntry("What is the estimated price for a single FCH041N65EFL4 unit?", "5"),
+                new TestEntry("I’d like to know if the AFGH4L60T120RW-STDis available in stock.", "5")
             ));
 
             int correct = 0;
             for (int i = 0; i < testEntries.size(); i++) {
                 TestEntry entry = testEntries.get(i);
                 String result = run(entry.prompt);
-                System.out.println(i + "/" + testEntries.size() + " Expected: " + entry.expectedCategory + ", Actual: " + result);
+                System.out.println(i + "/" + testEntries.size() + " Expected: " + entry.expectedCategory + ", Classified as: " + result);
                 if (result.equals(entry.expectedCategory)) {
                     correct++;
                 }

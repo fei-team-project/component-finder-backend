@@ -30,7 +30,6 @@ public class ModelSelectorService {
                 response = new GPTResponse<>();
                 String fromEmbeddings = EmbeddingsService.run(request.getRequest());
                 response.setContent(fromEmbeddings);
-
                 return response;
             case 2:
                 response = new GPTResponse<>();
