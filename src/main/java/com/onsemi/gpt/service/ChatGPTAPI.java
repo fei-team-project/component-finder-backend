@@ -6,8 +6,6 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.context.annotation.Configuration;
 
 import io.github.cdimascio.dotenv.Dotenv;
