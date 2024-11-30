@@ -18,12 +18,10 @@ import lombok.AllArgsConstructor;
 public class ModelSelectorService {
 
     private GPTService GPTService;
-    private final LuisService luisService;
 
     public GPTResponse<?> getResponse(GPTRequest request) {
         GPTResponse<?> response;
         int modelId = selectModel(request);
-        //int modelId = luisService.getModelId(request);
         switch (modelId) {
             case 0:
                 return GPTService.getResponse(request);
