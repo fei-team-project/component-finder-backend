@@ -22,12 +22,14 @@ public class ModelSelectorService {
     public GPTResponse<?> getResponse(GPTRequest request) {
         GPTResponse<?> response;
         int modelId = selectModel(request);
+        modelId = 1;
         switch (modelId) {
             case 0:
                 return GPTService.getResponse(request);
             case 1:
                 response = new GPTResponse<>();
-                response.setContent("Model 1");
+                String fromEmbeddings = EmbeddingsService.run(request.getRequest());
+                response.setContent(fromEmbeddings);
                 return response;
             case 2:
                 response = new GPTResponse<>();
