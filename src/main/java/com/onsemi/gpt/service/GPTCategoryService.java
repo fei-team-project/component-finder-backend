@@ -12,9 +12,9 @@ import java.util.regex.Pattern;
 @Service
 @AllArgsConstructor
 public class GPTCategoryService {
-    private ChatGPTAPI chatGPTAPI;
+    private static final ChatGPTAPI chatGPTAPI = new ChatGPTAPI();
 
-    public int selectModel(GPTRequest request) {
+    public static int selectModel(GPTRequest request) {
         try {
             // definovanie promptu pre kategorizáciu
             String prompt = "Categorize this text into one of the categories:"

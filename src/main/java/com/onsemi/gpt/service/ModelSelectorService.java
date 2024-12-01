@@ -28,16 +28,15 @@ public class ModelSelectorService {
                 return GPTService.getResponse(request);
             case 1:
                 response = new GPTResponse<>();
-                String fromEmbeddings = EmbeddingsService.run(request.getRequest());
-                response.setContent(fromEmbeddings);
+                response.setContent("Embeddings: " + EmbeddingsService.run(request.getRequest()));
                 return response;
             case 2:
                 response = new GPTResponse<>();
-                response.setContent("Model 2");
+                response.setContent("LUIS: " + LuisService.getModelId(request));
                 return response;
             case 3:
                 response = new GPTResponse<>();
-                response.setContent("Model 3");
+                response.setContent("GPT: " + GPTCategoryService.selectModel(request));
                 return response;
             case 4:
                 response = new GPTResponse<>();

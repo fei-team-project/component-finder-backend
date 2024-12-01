@@ -23,7 +23,7 @@ public class LuisService {
     private static final String LUIS_API_KEY = dotenv.get("LUIS_API_KEY");
     private static final String API_URL = "https://tp1.cognitiveservices.azure.com/language/:analyze-conversations?api-version=2022-10-01-preview";
 
-    public int getModelId(GPTRequest request) {
+    public static int getModelId(GPTRequest request) {
         try {
             String query = request.getRequest();
             String requestBody = String.format("{\"kind\":\"Conversation\",\"analysisInput\":{\"conversationItem\":{\"id\":\"1\",\"text\":\"%s\",\"modality\":\"text\",\"language\":\"en\",\"participantId\":\"1\"}},\"parameters\":{\"projectName\":\"TP_Intents\",\"verbose\":true,\"deploymentName\":\"T1_decision_model_deployment\",\"stringIndexType\":\"TextElement_V8\"}}", query);
@@ -70,7 +70,7 @@ public class LuisService {
         return -1;
     }
 
-    private int mapIntentToId(String intent) {
+    private static int mapIntentToId(String intent) {
         switch (intent) {
             case "products_by_parameters":
                 return 0;
