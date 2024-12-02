@@ -88,7 +88,7 @@ public class ExtractService {
                 countOfMessages = history.size();
             }
         }
-        return getExtractResponse(component, request, objectMapper, previousAttributesString, countOfMessages);
+        return getExtractResponse(component, request, objectMapper, previousAttributesString, (Integer)countOfMessages);
     }
 
     public ExtractResponse extractFromFilterRequest(List<APair> attributes, String tableName) throws Exception{

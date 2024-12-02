@@ -66,7 +66,7 @@ public class EmbeddingsService {
         byte[] hashBytes = digest.digest(json.toString().getBytes(StandardCharsets.UTF_8));
         StringBuilder hash = new StringBuilder();
         for (byte b : hashBytes) {
-            hash.append(String.format("%02x", b));
+            hash.append(b);
         }
         return hash.toString();
     }
@@ -144,7 +144,7 @@ public class EmbeddingsService {
         return embeddings;
     }
 
-    public static String classifyPrompt(String userPrompt, Map<String, List<double[]>> categoryEmbeddings) throws Exception {
+    public static int classifyPrompt(String userPrompt, Map<String, List<double[]>> categoryEmbeddings) throws Exception {
         JSONObject response = getEmbedding(userPrompt);
         JSONArray userEmbeddingArray = response.getJSONArray("data").getJSONObject(0).getJSONArray("embedding");
         double[] userEmbedding = new double[userEmbeddingArray.length()];
@@ -166,7 +166,8 @@ public class EmbeddingsService {
             }
         }
 
-        return bestCategory;
+        assert bestCategory != null;
+        return Integer.parseInt(bestCategory);
     }
 
     public static double cosineSimilarity(double[] a, double[] b) {
@@ -308,13 +309,13 @@ public class EmbeddingsService {
         }
     }
 
-    public static String run(String message){
+    public static int run(String message){
         try {
             return classifyPrompt(message, categoryEmbeddings);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "okay";
+        return 0;
     }
 
     public static class TestEntry {
@@ -411,9 +412,9 @@ public class EmbeddingsService {
             int correct = 0;
             for (int i = 0; i < testEntries.size(); i++) {
                 TestEntry entry = testEntries.get(i);
-                String result = run(entry.prompt);
+                int result = run(entry.prompt);
                 System.out.println(i + "/" + testEntries.size() + " Expected: " + entry.expectedCategory + ", Classified as: " + result);
-                if (result.equals(entry.expectedCategory)) {
+                if (result == Integer.parseInt(entry.expectedCategory)) {
                     correct++;
                 }
             }

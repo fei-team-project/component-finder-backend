@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 public class GPTCategoryService {
     private static final ChatGPTAPI chatGPTAPI = new ChatGPTAPI();
 
-    public static int selectModel(GPTRequest request) {
+    public int selectModel(GPTRequest request) {
         try {
             // definovanie promptu pre kategorizáciu
             String prompt = "Categorize this text into one of the categories:"
