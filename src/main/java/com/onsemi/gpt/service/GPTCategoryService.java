@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 public class GPTCategoryService {
     private static final ChatGPTAPI chatGPTAPI = new ChatGPTAPI();
 
-    public int selectModel(GPTRequest request) {
+    public ModelSelectorEnum selectModel(GPTRequest request) {
         try {
             // definovanie promptu pre kategorizáciu
             String prompt = "Categorize this text into one of the categories:"
@@ -48,7 +48,7 @@ public class GPTCategoryService {
             Pattern pattern = Pattern.compile("\\d+");
             Matcher matcher = pattern.matcher(categoryText);
             if (matcher.find()) {
-                return Integer.parseInt(matcher.group());
+                return ModelSelectorEnum.getModelFromNumber(Integer.parseInt(matcher.group()));
             } else {
                 throw new BadRequestException("No valid category number found in the response.");
             }
