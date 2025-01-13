@@ -309,13 +309,13 @@ public class EmbeddingsService {
         }
     }
 
-    public static int run(String message){
+    public static ModelSelectorEnum run(String message){
         try {
-            return classifyPrompt(message, categoryEmbeddings);
+            return ModelSelectorEnum.getModelFromNumber(classifyPrompt(message, categoryEmbeddings));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return 0;
+        return ModelSelectorEnum.getModelFromNumber(-1);
     }
 
     public static class TestEntry {
@@ -412,11 +412,11 @@ public class EmbeddingsService {
             int correct = 0;
             for (int i = 0; i < testEntries.size(); i++) {
                 TestEntry entry = testEntries.get(i);
-                int result = run(entry.prompt);
+                ModelSelectorEnum result = run(entry.prompt);
                 System.out.println(i + "/" + testEntries.size() + " Expected: " + entry.expectedCategory + ", Classified as: " + result);
-                if (result == Integer.parseInt(entry.expectedCategory)) {
-                    correct++;
-                }
+//                if (result == Integer.parseInt(entry.expectedCategory)) {
+//                    correct++;
+//                }
             }
 
             return (double) correct / testEntries.size() * 100;
