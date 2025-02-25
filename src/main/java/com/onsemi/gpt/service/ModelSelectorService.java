@@ -45,7 +45,7 @@ public class ModelSelectorService {
 
     public ModelSelectorEnum selectModel(GPTRequest request) {
         return GPTCategoryService.selectModel(request);
-        //return LuisService.getModelId(request);
-        //return EmbeddingsService.run(request.getRequest());
+//        return LuisService.getModelId(request);
+//        return EmbeddingsService.run(request.getRequest());
     }
 }
