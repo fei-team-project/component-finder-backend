@@ -17,13 +17,13 @@ public class GPTCategoryService {
     public ModelSelectorEnum selectModel(GPTRequest request) {
         try {
             // definovanie promptu pre kategorizáciu
-            String prompt = "Categorize this text into one of the categories:"
-                    + "1. Search for a part by parameters."
-                    + "2. Suggest complementary parts."
-                    + "3. Find documentation for the part."
-                    + "4. Find similar parts."
-                    + "5. Find out the availability and price of the part."
-                    + "Text:" + request.getRequest().replace("\"", "")
+            String prompt = "Categorize the following request based on these rules:\n\n"
+                    + "1. Category 1: If the request contains technical specifications (e.g., voltage, current, resistance) or general part types (e.g., analog_bjt, mosfet, op-amp), but ONLY if they're accompanied by specific parameters.\n"
+                    + "2. Category 2: If the request contains a specific part number (OPN or ID) and asks for complementary, matching, associated, or synergistic parts.\n"
+                    + "3. Category 3: If the request contains a specific part number (OPN or ID) and asks for documentation, datasheets, specs, manuals, or reference materials.\n"
+                    + "4. Category 4: If the request contains a specific part number (OPN or ID) and asks for alternatives, substitutes, or similar parts.\n"
+                    + "5. Category 5: If the request contains a specific part number (OPN or ID) and asks about pricing, cost, availability, or order status.\n\n"
+                    + "Request: " + request.getRequest().replace("\"", "") + "\n"
                     + "Category:";
 
             // ziskanie odpovede
