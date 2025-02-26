@@ -10,27 +10,24 @@ import org.springframework.stereotype.Service;
 public class ModelSelectorService {
 
     private GPTService GPTService;
+    private GPTComplementaryPartsService GPTComplementaryPartsService;
     private GPTCategoryService GPTCategoryService;
 
-    public GPTResponse<?> getResponse(GPTRequest request) {
+    public GPTResponse<?> getResponse(GPTRequest request) throws Exception {
         GPTResponse<?> response;
         ModelSelectorEnum modelType = selectModel(request);
         switch (modelType) {
             case ModelSelectorEnum.SEARCH_PART_BY_PARAMS:
-                response = new GPTResponse<>();
-                response.setContent("Kategória 1");
                 return GPTService.getResponse(request);
             case ModelSelectorEnum.SUGGEST_COMPLEMENTARY_PARTS:
-                response = new GPTResponse<>();
-                response.setContent("Kategória 2");
-                return response;
+                return GPTComplementaryPartsService.getResponse(request);
             case ModelSelectorEnum.FIND_DOCUMENTATION_FOR_PARTS:
                 response = new GPTResponse<>();
                 response.setContent("Kategória 3");
                 return response;
             case ModelSelectorEnum.FIND_SIMILAR_PARTS:
                 response = new GPTResponse<>();
-                response.setContent("Kategória 4");
+                response.setContent("Kategória 2");
                 return response;
             case ModelSelectorEnum.CHECK_AVAILABILITY_AND_PRICE:
                 response = new GPTResponse<>();
