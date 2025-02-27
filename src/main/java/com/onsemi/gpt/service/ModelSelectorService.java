@@ -11,6 +11,7 @@ public class ModelSelectorService {
 
     private GPTService GPTService;
     private GPTComplementaryPartsService GPTComplementaryPartsService;
+    private GPTSimilarPartsService GPTSimilarPartsService;
     private GPTCategoryService GPTCategoryService;
 
     public GPTResponse<?> getResponse(GPTRequest request) throws Exception {
@@ -26,9 +27,10 @@ public class ModelSelectorService {
                 response.setContent("Kategória 3");
                 return response;
             case ModelSelectorEnum.FIND_SIMILAR_PARTS:
-                response = new GPTResponse<>();
-                response.setContent("Kategória 2");
-                return response;
+//                response = new GPTResponse<>();
+//                response.setContent("Kategória 4");
+//                return response;
+                return GPTSimilarPartsService.getResponse(request);
             case ModelSelectorEnum.CHECK_AVAILABILITY_AND_PRICE:
                 response = new GPTResponse<>();
                 response.setContent("Kategória 5");
