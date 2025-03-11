@@ -23,6 +23,7 @@ public class GPTCategoryService {
                     + "3. Category 3: If the request contains a specific part number (OPN or ID) and asks for documentation, datasheets, specs, manuals, or reference materials."
                     + "4. Category 4: If the request contains a specific part number (OPN or ID) and asks for alternatives, substitutes, or similar parts."
                     + "5. Category 5: If the request contains a specific part number (OPN or ID) and asks about pricing, cost, availability, or order status."
+                    + "6. Category 6: If the request does not resemble anything from categories 1 - 5. This will be the wrong request category."
                     + "Request: " + request.getRequest().replace("\"", "")
                     + "Category:";
 
