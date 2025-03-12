@@ -51,8 +51,8 @@ public class EmbeddingsService {
             }
             JSONObject resJson = new JSONObject(response.toString());
             int usedTokens = resJson.getJSONObject("usage").getInt("total_tokens");
-            System.out.println("Tokens consumed: " + usedTokens);
-            System.out.println("For prompt: " + text);
+//            System.out.println("Tokens consumed: " + usedTokens);
+//            System.out.println("For prompt: " + text);
             return resJson;
         }
     }
@@ -413,7 +413,11 @@ public class EmbeddingsService {
             for (int i = 0; i < testEntries.size(); i++) {
                 TestEntry entry = testEntries.get(i);
                 ModelSelectorEnum result = run(entry.prompt);
-                System.out.println(i + "/" + testEntries.size() + " Expected: " + entry.expectedCategory + ", Classified as: " + result);
+//                System.out.println(i + "/" + testEntries.size() + " Expected: " + entry.expectedCategory + ", Classified as: " + result);
+                System.out.println(entry.prompt + ";" + ModelSelectorEnum.getModelFromNumber(Integer.parseInt(entry.expectedCategory)) + ";" + result);
+                if (result == ModelSelectorEnum.getModelFromNumber(Integer.parseInt(entry.expectedCategory))) {
+                    correct++;
+                }
 //                if (result == Integer.parseInt(entry.expectedCategory)) {
 //                    correct++;
 //                }
