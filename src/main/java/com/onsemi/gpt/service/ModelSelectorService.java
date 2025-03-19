@@ -3,35 +3,36 @@ package com.onsemi.gpt.service;
 import com.onsemi.gpt.models.GPTRequest;
 import com.onsemi.gpt.models.GPTResponse;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class ModelSelectorService {
 
     private GPTService GPTService;
+    private GPTSimilarPartsService GPTSimilarPartsService;
+    private GPTComplementaryPartsService GPTComplementaryPartsService;
     private GPTCategoryService GPTCategoryService;
+    private ChatGPTAPI chatGPTAPI;
 
-    public GPTResponse<?> getResponse(GPTRequest request) {
+    public GPTResponse<?> getResponse(GPTRequest request) throws Exception {
         GPTResponse<?> response;
-        ModelSelectorEnum modelType = selectModel(request);
+        String selectedProductId = chatGPTAPI.getRequestId(request);
+        ModelSelectorEnum modelType = selectModel(request, selectedProductId);
+
         switch (modelType) {
             case ModelSelectorEnum.SEARCH_PART_BY_PARAMS:
-                response = new GPTResponse<>();
-                response.setContent("Kategória 1");
                 return GPTService.getResponse(request);
             case ModelSelectorEnum.SUGGEST_COMPLEMENTARY_PARTS:
-                response = new GPTResponse<>();
-                response.setContent("Kategória 2");
-                return response;
+                return GPTComplementaryPartsService.getResponse(selectedProductId);
             case ModelSelectorEnum.FIND_DOCUMENTATION_FOR_PARTS:
                 response = new GPTResponse<>();
                 response.setContent("Kategória 3");
                 return response;
             case ModelSelectorEnum.FIND_SIMILAR_PARTS:
-                response = new GPTResponse<>();
-                response.setContent("Kategória 4");
-                return response;
+                return GPTSimilarPartsService.getResponse(selectedProductId);
             case ModelSelectorEnum.CHECK_AVAILABILITY_AND_PRICE:
                 response = new GPTResponse<>();
                 response.setContent("Kategória 5");
@@ -43,9 +44,9 @@ public class ModelSelectorService {
         }
     }
 
-    public ModelSelectorEnum selectModel(GPTRequest request) {
-        return GPTCategoryService.selectModel(request);
-//        return LuisService.getModelId(request);
-//        return EmbeddingsService.run(request.getRequest());
+    public ModelSelectorEnum selectModel(GPTRequest request, String selectedProductId) {
+        return GPTCategoryService.selectModel(request, selectedProductId);
+        // return LuisService.getModelId(request);
+        // return EmbeddingsService.run(request.getRequest());
     }
 }
