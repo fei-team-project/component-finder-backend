@@ -25,10 +25,6 @@ public class GPTComplementaryPartsService {
                 {
                     "sourceType": "WPN",
                     "source": "%s"
-                },
-                {
-                    "sourceType": "CATEGORY",
-                    "source": "mosfets"
                 }
             ]
         }
