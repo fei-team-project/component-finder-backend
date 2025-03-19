@@ -94,7 +94,7 @@ public class GPTComplementaryPartsService {
 
         // Uloženie výsledkov do zoznamu
         List<String> extractedItems = new ArrayList<>();
-        extractedItems.add("To this part " + selectedProductId + ", I found these complementary parts: ");
+        extractedItems.add("For the part " + selectedProductId + ", I found the following complementary parts:\n");
 
         // Iterácia cez pole JSON objektov
         for (JsonNode item : rootNode) {
@@ -105,7 +105,8 @@ public class GPTComplementaryPartsService {
                 if (recommendationResults != null && recommendationResults.isArray()) {
                     for (JsonNode recommendation : recommendationResults) {
                         String heading = recommendation.get("heading").asText();
-                        extractedItems.add(heading + ", ");
+                        String description = recommendation.get("description").asText();
+                        extractedItems.add("• " + heading + " - " + description);
                     }
                 }
             }
@@ -113,7 +114,7 @@ public class GPTComplementaryPartsService {
 
         extractedItems.forEach(System.out::println);
 
-        String joinedItems = String.join("\n\n", extractedItems);
+        String joinedItems = String.join("\n", extractedItems);
 
         joinedItems = joinedItems.substring(0, joinedItems.length() - 2);
 
