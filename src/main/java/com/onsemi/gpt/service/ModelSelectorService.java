@@ -13,24 +13,24 @@ public class ModelSelectorService {
     private GPTSimilarPartsService GPTSimilarPartsService;
     private GPTComplementaryPartsService GPTComplementaryPartsService;
     private GPTCategoryService GPTCategoryService;
+    private ChatGPTAPI chatGPTAPI;
 
     public GPTResponse<?> getResponse(GPTRequest request) throws Exception {
         GPTResponse<?> response;
-        ModelSelectorEnum modelType = selectModel(request);
+        String selectedProductId = chatGPTAPI.getRequestId(request);
+        ModelSelectorEnum modelType = selectModel(request, selectedProductId);
+
         switch (modelType) {
             case ModelSelectorEnum.SEARCH_PART_BY_PARAMS:
                 return GPTService.getResponse(request);
             case ModelSelectorEnum.SUGGEST_COMPLEMENTARY_PARTS:
-                return GPTComplementaryPartsService.getResponse(request);
+                return GPTComplementaryPartsService.getResponse(selectedProductId);
             case ModelSelectorEnum.FIND_DOCUMENTATION_FOR_PARTS:
                 response = new GPTResponse<>();
                 response.setContent("Kategória 3");
                 return response;
             case ModelSelectorEnum.FIND_SIMILAR_PARTS:
-                // response = new GPTResponse<>();
-                // response.setContent("Kategória 4");
-                // return response;
-                return GPTSimilarPartsService.getResponse(request);
+                return GPTSimilarPartsService.getResponse(selectedProductId);
             case ModelSelectorEnum.CHECK_AVAILABILITY_AND_PRICE:
                 response = new GPTResponse<>();
                 response.setContent("Kategória 5");
@@ -42,8 +42,8 @@ public class ModelSelectorService {
         }
     }
 
-    public ModelSelectorEnum selectModel(GPTRequest request) {
-        return GPTCategoryService.selectModel(request);
+    public ModelSelectorEnum selectModel(GPTRequest request, String selectedProductId) {
+        return GPTCategoryService.selectModel(request, selectedProductId);
         // return LuisService.getModelId(request);
         // return EmbeddingsService.run(request.getRequest());
     }
