@@ -30,7 +30,8 @@ public class GPTSimilarPartsService {
 
                 httpResponse = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
             }
-            response.setContent(httpResponse.body());
+
+            response.setContent(httpResponse.body().isBlank() ? "No data found." : httpResponse.body());
         } catch (Exception e) {
             response.setContent("Search unsuccessful. Try rephrasing your request.");
         }

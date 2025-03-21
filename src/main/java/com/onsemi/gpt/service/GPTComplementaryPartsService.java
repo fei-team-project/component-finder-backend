@@ -38,8 +38,12 @@ public class GPTComplementaryPartsService {
 
         HttpResponse<String> httpResponse = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
 
-        System.out.println("Response code: " + httpResponse.statusCode());
-        System.out.println("Response body: " + httpResponse.body());
+        GPTResponse<?> response = new GPTResponse<>();
+
+        if (httpResponse.body().isBlank() || httpResponse.body().equals("[]") || httpResponse.body().trim().equals("{}")) {
+            response.setContent("No data found.");
+            return response;
+        }
 
         // Inicializácia Jackson ObjectMapper
         ObjectMapper objectMapper = new ObjectMapper();
@@ -67,13 +71,9 @@ public class GPTComplementaryPartsService {
             }
         }
 
-        extractedItems.forEach(System.out::println);
-
         String joinedItems = String.join("\n", extractedItems);
-
         joinedItems = joinedItems.substring(0, joinedItems.length() - 2);
 
-        GPTResponse<?> response = new GPTResponse<>();
         response.setContent(joinedItems.replaceAll("<[^>]+>", ""));
         return response;
     }
