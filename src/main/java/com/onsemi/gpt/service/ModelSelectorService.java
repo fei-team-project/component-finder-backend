@@ -19,8 +19,9 @@ public class ModelSelectorService {
 
     public GPTResponse<?> getResponse(GPTRequest request) throws Exception {
         GPTResponse<?> response;
-        String selectedProductId = chatGPTAPI.getRequestId(request);
-        ModelSelectorEnum modelType = selectModel(request, selectedProductId);
+        //String selectedProductId = chatGPTAPI.getRequestId(request);
+        String selectedProductId = "";
+        ModelSelectorEnum modelType = selectModel(request);
 
         switch (modelType) {
             case ModelSelectorEnum.SEARCH_PART_BY_PARAMS:
@@ -44,8 +45,8 @@ public class ModelSelectorService {
         }
     }
 
-    public ModelSelectorEnum selectModel(GPTRequest request, String selectedProductId) {
-        return GPTCategoryService.selectModel(request, selectedProductId);
+    public ModelSelectorEnum selectModel(GPTRequest request) {
+        return GPTCategoryService.selectModel(request);
         // return LuisService.getModelId(request);
         // return EmbeddingsService.run(request.getRequest());
     }

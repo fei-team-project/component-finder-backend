@@ -15,40 +15,73 @@ import java.util.regex.Pattern;
 public class GPTCategoryService {
     private static final ChatGPTAPI chatGPTAPI = new ChatGPTAPI();
 
-    public ModelSelectorEnum selectModel(GPTRequest request, String selectedProductId) {
+    public ModelSelectorEnum selectModel(GPTRequest request) {
         try {
-            String prompt = getPrompt(request, selectedProductId);
+            String prompt = getPrompt(request);
+            Matcher matcher = this.getAnswerMatcher(prompt);
 
-            // ziskanie odpovede
-            String response = chatGPTAPI.generateResponseWithModel(
-                    prompt,
-                    "You are a categorization assistant. Answer only with one number.",
-                    "gpt-4-1106-preview"
-            );
-
-            // gpt-4o - $2.50 / 1M input tokens
-            // gpt-4-1106-preview - $10.00 / 1M tokens
-            // gpt-4 - $30.00 / 1M tokens
-
-            // parsovanie JSON odpovede
-            JSONObject jsonResponse = new JSONObject(response);
-            String categoryText = jsonResponse.getJSONArray("choices")
-                    .getJSONObject(0)
-                    .getJSONObject("message")
-                    .getString("content").trim();
-
-            // dostat cislo kategorie
-            Pattern pattern = Pattern.compile("\\d+");
-            Matcher matcher = pattern.matcher(categoryText);
             if (matcher.find()) {
                 return ModelSelectorEnum.getModelFromNumber(Integer.parseInt(matcher.group()));
             } else {
                 throw new BadRequestException("No valid category number found in the response.");
             }
-
         } catch (Exception e) {
             throw new RuntimeException("An error occurred when calling the GPT API: " + e.getMessage(), e);
         }
+    }
+
+    public ModelSelectorEnum selectModel(GPTRequest request, String selectedProductId) {
+        try {
+            String prompt = getPrompt(request, selectedProductId);
+            Matcher matcher = this.getAnswerMatcher(prompt);
+
+            if (matcher.find()) {
+                return ModelSelectorEnum.getModelFromNumber(Integer.parseInt(matcher.group()));
+            } else {
+                throw new BadRequestException("No valid category number found in the response.");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("An error occurred when calling the GPT API: " + e.getMessage(), e);
+        }
+    }
+
+    private Matcher getAnswerMatcher(String prompt) throws Exception {
+        // ziskanie odpovede
+        String response = chatGPTAPI.generateResponseWithModel(
+                prompt,
+                "You are a categorization assistant. Answer only with one number.",
+                "gpt-4-1106-preview"
+        );
+
+        // gpt-4o - $2.50 / 1M input tokens
+        // gpt-4-1106-preview - $10.00 / 1M tokens
+        // gpt-4 - $30.00 / 1M tokens
+
+        // parsovanie JSON odpovede
+        JSONObject jsonResponse = new JSONObject(response);
+        String categoryText = jsonResponse.getJSONArray("choices")
+                .getJSONObject(0)
+                .getJSONObject("message")
+                .getString("content").trim();
+
+        // dostat cislo kategorie
+        Pattern pattern = Pattern.compile("\\d+");
+        return pattern.matcher(categoryText);
+
+    }
+
+    private String getPrompt(GPTRequest request) {
+        return "Categorize the following request into one of the categories below. "
+                + "1. If the request is about technical specifications, general part types, or component selection, including:\n"
+                + "   - Numerical parameters (e.g., voltage, current, resistance)\n"
+                + "   - Functional requirements (e.g., low-light performance, high current, bidirectional switching, SMA package, etc.)\n"
+                + "   - General questions about suitable components for specific applications \n"
+                + "2. If the request contains a specific part number (OPN or WPN) and asks for related complementary, matching, associated, or synergistic parts.\n"
+                + "3. If the request contains only a specific part number (OPN or WPN) with no additional context.\n"
+                + "4. If the request contains a specific part number (OPN or WPN) and asks for alternatives, substitutes, or similar parts.\n\n"
+                + "5. If the request does not fit into any of the above categories, classify it here.\n\n"
+                + "Request: \"" + request.getRequest().replace("\"", "") + "\"\n"
+                + "Category:";
     }
 
     private String getPrompt(GPTRequest request, String selectedProductId) {
