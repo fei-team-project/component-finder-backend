@@ -4,7 +4,6 @@ import com.onsemi.gpt.models.GPTFiltersRequest;
 import com.onsemi.gpt.models.GPTResponse;
 import com.onsemi.gpt.service.EmbeddingsService;
 import com.onsemi.gpt.service.GPTService;
-import com.onsemi.gpt.service.ModelSelectorRegexService;
 import com.onsemi.gpt.service.ModelSelectorService;
 import com.onsemi.gpt.models.GPTRequest;
 import lombok.AllArgsConstructor;
@@ -18,7 +17,6 @@ public class GPTController {
 
     private final GPTService service;
     private ModelSelectorService modelSelectorService;
-    private ModelSelectorRegexService modelSelectorRegexService;
 
     @PostMapping("/request/new")
     public GPTResponse getGPTResponse(@RequestBody GPTRequest request) throws Exception {
