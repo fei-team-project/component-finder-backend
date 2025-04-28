@@ -22,8 +22,7 @@ public class GPTController {
 
     @PostMapping("/request/new")
     public GPTResponse getGPTResponse(@RequestBody GPTRequest request) throws Exception {
-        //return this.modelSelectorService.getResponse(request);
-        return this.modelSelectorRegexService.getResponse(request);
+        return this.modelSelectorService.getResponse(request);
     }
 
     @PostMapping("/request/update")

@@ -15,13 +15,12 @@ public class ModelSelectorService {
     private GPTSimilarPartsService GPTSimilarPartsService;
     private GPTComplementaryPartsService GPTComplementaryPartsService;
     private GPTCategoryService GPTCategoryService;
-    private ChatGPTAPI chatGPTAPI;
+    private RegexService regexService;
 
     public GPTResponse<?> getResponse(GPTRequest request) throws Exception {
         GPTResponse<?> response;
-        //String selectedProductId = chatGPTAPI.getRequestId(request);
-        String selectedProductId = "";
-        ModelSelectorEnum modelType = selectModel(request);
+        String selectedProductId = regexService.getOpnWpn(request);
+        ModelSelectorEnum modelType = selectModel(request, selectedProductId);
 
         switch (modelType) {
             case ModelSelectorEnum.SEARCH_PART_BY_PARAMS:
@@ -45,8 +44,8 @@ public class ModelSelectorService {
         }
     }
 
-    public ModelSelectorEnum selectModel(GPTRequest request) {
-        return GPTCategoryService.selectModel(request);
+    public ModelSelectorEnum selectModel(GPTRequest request, String selectedProductId) {
+        return GPTCategoryService.selectModel(request, selectedProductId);
         // return LuisService.getModelId(request);
         // return EmbeddingsService.run(request.getRequest());
     }
