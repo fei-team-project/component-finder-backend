@@ -32,13 +32,13 @@ public class ModelSelectorService {
                 return findDocsForPartsService.getResponse(selectedProductId);
             case ModelSelectorEnum.FIND_SIMILAR_PARTS:
                 return GPTSimilarPartsService.getResponse(selectedProductId);
-            case ModelSelectorEnum.CHECK_AVAILABILITY_AND_PRICE:
+            case ModelSelectorEnum.OTHER:
                 response = new GPTResponse<>();
-                response.setContent("Kategória 5");
+                response.setContent("I can't answer your request");
                 return response;
             default:
                 response = new GPTResponse<>();
-                response.setContent("Žiadna kategória");
+                response.setContent("I can't answer your request");
                 return response;
         }
     }
