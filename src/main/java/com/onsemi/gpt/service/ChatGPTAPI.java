@@ -60,25 +60,4 @@ public class ChatGPTAPI {
             return response.toString();
         }
     }
-
-
-    public String getRequestId(GPTRequest request) throws Exception {
-        String prompt = "I need to select the ID of product from this request. The ID is a continuous string without spaces," +
-                " consisting of both letters and numbers, with a minimum length of 6. Return the string from this request. " +
-                "If there isn't an id return empty string."
-                + "Request: " + request.getRequest().replace("\"", "");
-
-        String gptResponse = this.generateResponseWithModel(
-                prompt,
-                "You have to select product id from this request. Answer only with the ID nothing else.",
-                "gpt-4-1106-preview"
-        );
-
-        JSONObject jsonResponse = new JSONObject(gptResponse);
-
-        return jsonResponse.getJSONArray("choices")
-                .getJSONObject(0)
-                .getJSONObject("message")
-                .getString("content").trim();
-    }
 }
