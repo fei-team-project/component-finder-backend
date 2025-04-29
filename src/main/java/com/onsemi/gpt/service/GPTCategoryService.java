@@ -33,8 +33,8 @@ public class GPTCategoryService {
     public ModelSelectorEnum selectModel(GPTRequest request, String selectedProductId) {
         try {
             String prompt = getPrompt(request, selectedProductId);
-            Matcher matcher = this.getAnswerMatcher(prompt);
 
+            Matcher matcher = this.getAnswerMatcher(prompt);
             if (matcher.find()) {
                 return ModelSelectorEnum.getModelFromNumber(Integer.parseInt(matcher.group()));
             } else {
@@ -72,22 +72,22 @@ public class GPTCategoryService {
 
     private String getPrompt(GPTRequest request) {
         return "Categorize the following request into one of the categories below. "
-                + "1. If the request is about technical specifications, general part types, or component selection, including:\n"
-                + "   - Numerical parameters (e.g., voltage, current, resistance)\n"
-                + "   - Functional requirements (e.g., low-light performance, high current, bidirectional switching, SMA package, etc.)\n"
-                + "   - General questions about suitable components for specific applications \n"
-                + "2. If the request contains a specific part number (OPN or WPN) and asks for related complementary, matching, associated, or synergistic parts.\n"
-                + "3. If the request contains only a specific part number (OPN or WPN) with no additional context.\n"
-                + "4. If the request contains a specific part number (OPN or WPN) and asks for alternatives, substitutes, or similar parts.\n\n"
-                + "5. If the request does not fit into any of the above categories, classify it here.\n\n"
-                + "Request: \"" + request.getRequest().replace("\"", "") + "\"\n"
+                + "1. If the request is about technical specifications, general part types, or component selection, including:"
+                + "   - Numerical parameters (e.g., voltage, current, resistance)"
+                + "   - Functional requirements (e.g., low-light performance, high current, bidirectional switching, SMA package, etc.)"
+                + "   - General questions about suitable components for specific applications "
+                + "2. If the request contains a specific part number (OPN or WPN) and asks for related complementary, matching, associated, or synergistic parts."
+                + "3. If the request contains only a specific part number (OPN or WPN) with no additional context."
+                + "4. If the request contains a specific part number (OPN or WPN) and asks for alternatives, substitutes, or similar parts."
+                + "5. If the request does not fit into any of the above categories, classify it here."
+                + "Request: " + request.getRequest().replace("\"", "")
                 + "Category:";
     }
 
     private String getPrompt(GPTRequest request, String selectedProductId) {
         String prompt;
 
-        if (!Objects.equals(selectedProductId, "")) {
+        if (!Objects.equals(selectedProductId, null)) {
             // definovanie promptu pre kategorizáciu
             prompt = "Categorize the following request based on these rules:"
                     + "2. Category 2: If the request contains a specific part number (OPN or ID) and asks for complementary, matching, associated, or synergistic parts."
@@ -104,6 +104,8 @@ public class GPTCategoryService {
                     + "Request: " + request.getRequest().replace("\"", "")
                     + "Category:";
         }
+
+
         return prompt;
     }
 }
