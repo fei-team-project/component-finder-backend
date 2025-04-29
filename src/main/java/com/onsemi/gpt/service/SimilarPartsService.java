@@ -11,7 +11,7 @@ import java.net.http.HttpResponse;
 
 @AllArgsConstructor
 @Service
-public class GPTSimilarPartsService {
+public class SimilarPartsService {
     public GPTResponse<?> getResponse(String selectedProductId) {
         String searchLink = String.format("https://www.onsemi.com/design/tools-software/product-recommendation-tools-plus/api/similarProducts?generalPartNumber=%s", selectedProductId);
 
@@ -31,9 +31,9 @@ public class GPTSimilarPartsService {
                 httpResponse = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
             }
 
-            response.setContent(httpResponse.body().isBlank() ? "No data found." : httpResponse.body());
+            response.setContent(httpResponse.body().isBlank() ? "We’re sorry, but no similar parts were found for the provided OPN/WPN: " + selectedProductId + ". Please verify that the part number is correct." : httpResponse.body());
         } catch (Exception e) {
-            response.setContent("Search unsuccessful. Try rephrasing your request.");
+            response.setContent("We’re sorry, but no similar parts were found for the provided OPN/WPN: " + selectedProductId + ". Please verify that the part number is correct.");
         }
 
         return response;

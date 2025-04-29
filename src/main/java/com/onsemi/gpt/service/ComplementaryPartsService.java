@@ -15,7 +15,7 @@ import java.util.List;
 
 @AllArgsConstructor
 @Service
-public class GPTComplementaryPartsService {
+public class ComplementaryPartsService {
     public GPTResponse<?> getResponse(String selectedProductId) throws Exception {
         HttpClient client = HttpClient.newHttpClient();
 
@@ -41,7 +41,7 @@ public class GPTComplementaryPartsService {
         GPTResponse<?> response = new GPTResponse<>();
 
         if (httpResponse.body().isBlank() || httpResponse.body().equals("[]") || httpResponse.body().trim().equals("{}")) {
-            response.setContent("No data found.");
+            response.setContent("We’re sorry, but no complementary parts were found for the provided OPN/WPN: " + selectedProductId + ". Please verify that the part number is correct.");
             return response;
         }
 
@@ -50,6 +50,7 @@ public class GPTComplementaryPartsService {
 
         // Parsovanie JSON do JsonNode
         JsonNode rootNode = objectMapper.readTree(httpResponse.body());
+
 
         // Uloženie výsledkov do zoznamu
         List<String> extractedItems = new ArrayList<>();

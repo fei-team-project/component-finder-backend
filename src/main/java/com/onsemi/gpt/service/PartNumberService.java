@@ -17,7 +17,7 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @Service
-public class FindDocsForPartsService {
+public class PartNumberService {
     public GPTResponse<?> getResponse(String selectedProductId) {
         GPTResponse<?> GPTResponse = new GPTResponse<>();
         String responseContent = "For the product " + selectedProductId + ", I found these docs:";
@@ -37,7 +37,7 @@ public class FindDocsForPartsService {
             }
         }
         catch (Exception e) {
-            GPTResponse.setContent("Search unsuccessful. Try rephrasing your request.");
+            GPTResponse.setContent("We’re sorry, but no parts were found for the provided OPN/WPN: " + selectedProductId + ". Please verify that the part number is correct.");
         }
 
         String requestBody = String.format("""
@@ -85,7 +85,8 @@ public class FindDocsForPartsService {
                 responseContent += joinedItems;
             }
         } catch (Exception e) {
-            GPTResponse.setContent("Search unsuccessful. Try rephrasing your request.");
+            GPTResponse.setContent("We’re sorry, but no parts were found for the provided OPN/WPN: " + selectedProductId + ". Please verify that the part number is correct.");
+
         }
 
 
