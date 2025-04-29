@@ -2,9 +2,9 @@ package com.onsemi.gpt.service;
 
 public enum ModelSelectorEnum {
     SEARCH_PART_BY_PARAMS,
-    SUGGEST_COMPLEMENTARY_PARTS,
-    FIND_DOCUMENTATION_FOR_PARTS,
-    FIND_SIMILAR_PARTS,
+    COMPLEMENTARY_PARTS,
+    PART_NUMBER,
+    SIMILAR_PARTS,
     OTHER;
 
     public static ModelSelectorEnum getModelFromNumber(int number) {
